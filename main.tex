@@ -114,6 +114,7 @@ BNNH\cite{BNNH}ではクラスタを円と定義し、密集度を円の半径�
       $C, V_C$ & クラスタ, クラスタ内の分散 \\ \hline
       $O_C$ & クラスタの重心 \\ \hline
       $dist(p,q)$ & 点$p$と点$q$のユークリッド距離 \\ \hline
+      $f(p, C)$  & 点$p$とクラスタ$C$の集約距離 \\ \hline
       $\alpha, \beta$ & ユーザー定義の平滑パラメータ \\ \hline
       $k$ & ユーザー定義のクラスタサイズ \\ \hline
       $\Delta(C,Q)$ & $C$と$Q$の複合類似度 \\ \hline
@@ -142,10 +143,10 @@ f_{max}(p,Q) = max_{i=1}^{n} dist(p,q_i)
 \end{equation}
 
 \subsection{クラスタ内分散}
-クラスタの密集度をクラスタ内分散$V$で表す。点$p_1, \cdots p_n$が構成するクラスタ$P$の重心が$G_P$の時、$P$の分散を求める式を以下に示す。
+クラスタの密集度をクラスタ内分散$V$で表す。点$p_1, \cdots p_n$が構成するクラスタ$P$の重心が$O_P$の時、$P$の分散を求める式を以下に示す。
 \begin{equation}
 \label{equ:w}
-V_P = \frac{1}{|P|} \sum_{i=1}^{n} \{dist(p_i, G_P)\}^2 
+V_P = \frac{1}{|P|} \sum_{i=1}^{n} \{dist(p_i, O_P)\}^2 
 \end{equation}
 
 \subsection{クラスタの評価関数}
@@ -320,43 +321,43 @@ R-treeのを用いた手法の欠点は、走査が行われる際に毎回ル�
 \end{itemize}
 
 \subsection{データセット}
-実データと合成データを用いて実験を行った。実データはアメリカ国勢調査TIGERプロジェクト\cite{chorochronos}から取得したデータNE(123,593点)から一様乱数を用いて1万点を抜き出し、データセットを作成した。合成データは一様分布に基づくデータセットを作成し、使用した。
+実データと合成データを用いて実験を行った。実データはアメリカ国勢調査TIGERプロジェクト\cite{chorochronos}から取得したデータNE(123,593点)を使用した。合成データは一様分布に基づくデータセットを作成し、使用した。
 
 \subsection{パラメータ}
 クエリはデータセットからランダムに選択した。出力結果となるクエリサイズ$k$のデフォルト値は50、平滑パラメータ$\alpha, \beta$は共に0.5、グリットを用いる手法で分割するグリット数は$128^2$である。全ての実験結果は10回の試行の平均を用いている。
 
 \subsection{実験結果}
-平滑パラメータ$\alpha$を変化させた結果を図\ref{fig:sum-alpha}と図\ref{fig:max-alpha}に示す。集約距離をどちらに設定してもグリッドを用いた手法が他の2手法に比べて高速であることがいえる。これはグリッドを用いた手法ではクエリの近くから探索するので、フィルタリングに用いる閾値が早期に適切に設定され、フィルタリング量が大きかったためである。
+% 平滑パラメータ$\alpha$を変化させた結果を図\ref{fig:sum-alpha}と図\ref{fig:max-alpha}に示す。集約距離をどちらに設定してもグリッドを用いた手法が他の2手法に比べて高速であることがいえる。これはグリッドを用いた手法ではクエリの近くから探索するので、フィルタリングに用いる閾値が早期に適切に設定され、フィルタリング量が大きかったためである。
 
-2つの集約距離に一貫して、$\alpha$が0.5を超えると処理時間がスパークする傾向にあった。これは評価式において、前半の項の大きさが後半の項と比較して大きく、閾値が$\beta$に比べて$\alpha$に依存している傾向にあるからだと考えられる。
+% 2つの集約距離に一貫して、$\alpha$が0.5を超えると処理時間がスパークする傾向にあった。これは評価式において、前半の項の大きさが後半の項と比較して大きく、閾値が$\beta$に比べて$\alpha$に依存している傾向にあるからだと考えられる。
+
+% \begin{figure}[H]
+% 	\centering
+%      \fbox{\includegraphics[width=7cm]{images/experiment/variance/sum-alpha-beta.png}}
+%     \caption{$f=sum$, NE, $\mid$P$\mid$ = 123,593, $\beta$ = 0.5, k = 50, $\mid$Q$\mid$ = 5, n = $128^2$}
+%     \label{fig:sum-alpha}
+% \end{figure}
+
+% \begin{figure}[H]
+% 	\centering
+%     \fbox{\includegraphics[width=7cm]{images/experiment/variance/max-alpha-beta.png}}
+%     \caption{$f=max$, NE, $\mid$P$\mid$ = 123,593, $\beta$ = 0.5,  k = 50, $\mid$Q$\mid$ = 5, n = $128^2$}
+%     \label{fig:max-alpha}
+% \end{figure}
+
+クエリサイズを変化させた結果を図\ref{fig:sum-querySize}と図\ref{fig:max-querySize}に示す。集約距離をどちらに設定してもグリッドを用いた手法が他の2手法に比べて高速であることがいえる。これはグリッドを用いた手法ではクエリの近くから探索するので、フィルタリングに用いる閾値が早期に適切に設定され、フィルタリング量が大きかったためである。集約距離合計のグリッドを用いた手法ではクエリサイズが大きくなるほど速くなる結果となった。集約距離を最大に設定すると、ポイントベースとR-treeを用いた手法では集約距離合計の場合よりも速い結果となった。これはフィルタリングに用いる閾値と比較する値が、集約距離合計の際にはクエリからの距離の平均であるのに対して、集約距離合計の際にはクエリからの距離からの最大値であるので、フィルタリング量が大きかったと考えられる。
 
 \begin{figure}[H]
 	\centering
-     \fbox{\includegraphics[width=7cm]{images/experiment/variance/sum-alpha-beta.png}}
-    \caption{$f=sum$, NE, $\mid$P$\mid$ = 123,593, $\beta$ = 0.5, k = 50, $\mid$Q$\mid$ = 5, n = $128^2$}
-    \label{fig:sum-alpha}
-\end{figure}
-
-\begin{figure}[H]
-	\centering
-    \fbox{\includegraphics[width=7cm]{images/experiment/variance/max-alpha-beta.png}}
-    \caption{$f=max$, NE, $\mid$P$\mid$ = 123,593, $\beta$ = 0.5,  k = 50, $\mid$Q$\mid$ = 5, n = $128^2$}
-    \label{fig:max-alpha}
-\end{figure}
-
-クエリサイズを変化させた結果を図\ref{fig:sum-querySize}と図\ref{fig:max-querySize}に示す。集約距離合計と最大においてグリッドを用いた手法が最速になった。グリッドを用いた手法ではクエリサイズが大きくなるほど速くなる結果となった。集約距離を最大に設定すると、ポイントベースとR-treeを用いた手法では集約距離合計の場合よりも速い結果となった。これはフィルタリングに用いる閾値と比較する値が、集約距離合計の際にはクエリからの距離の平均であるのに対して、集約距離合計の際にはクエリからの距離からの最大値であるので、フィルタリング量が大きかったと考えられる。
-
-\begin{figure}[H]
-	\centering
-    \fbox{\includegraphics[width=7cm]{images/experiment/variance/sum-querySize.png}}
-    \caption{$f=sum$, NE, $\alpha$ = 0.5 , $\beta$ = 0.5 , $\mid$P$\mid$ = 10,000, k = 50, n = $128^2$}
+    \fbox{\includegraphics[width=7cm]{images/experiment/SUM-QuerySize.png}}
+    \caption{$f=sum$, NE, $\alpha$ = 0.5 , $\beta$ = 0.5 , $\mid$P$\mid$ = 123,593, k = 50, n = $128^2$}
     \label{fig:sum-querySize}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-    \fbox{\includegraphics[width=7cm]{images/experiment/variance/max-querySize.png}}
-    \caption{$f=max$, NE, $\alpha$ = 0.5 , $\beta$ = 0.5 , $\mid$P$\mid$ = 10,000, k = 50, n = $128^2$}
+    \fbox{\includegraphics[width=7cm]{images/experiment/MAX-QuerySize.png}}
+    \caption{$f=max$, NE, $\alpha$ = 0.5 , $\beta$ = 0.5 , $\mid$P$\mid$ = 123,593, k = 50, n = $128^2$}
     \label{fig:max-querySize}
 \end{figure}
 
@@ -364,30 +365,30 @@ R-treeのを用いた手法の欠点は、走査が行われる際に毎回ル�
 
 \begin{figure}[H]
 	\centering
-    \fbox{\includegraphics[width=7cm]{images/experiment/variance/sum-clusterSize.png}}
-    \caption{$f=sum$, NE, $\alpha$ = 0.5 , $\beta$ = 0.5 , $\mid$P$\mid$ = 10,000, $\mid$Q$\mid$ = 5, n = $128^2$}
+    \fbox{\includegraphics[width=7cm]{images/experiment/SUM-ClusterSize.png}}
+    \caption{$f=sum$, NE, $\alpha$ = 0.5 , $\beta$ = 0.5 , $\mid$P$\mid$ = 123,593, $\mid$Q$\mid$ = 5, n = $128^2$}
     \label{fig:sum-clusterSize}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-    \fbox{\includegraphics[width=7cm]{images/experiment/variance/max-clusterSize.png}}
-    \caption{$f=max$, NE, $\alpha$ = 0.5 , $\beta$ = 0.5 , $\mid$P$\mid$ = 10,000, $\mid$Q$\mid$ = 5, n = $128^2$}
+    \fbox{\includegraphics[width=7cm]{images/experiment/MAX-ClusterSize.png}}
+    \caption{$f=max$, NE, $\alpha$ = 0.5 , $\beta$ = 0.5 , $\mid$P$\mid$ = 123,593, $\mid$Q$\mid$ = 5, n = $128^2$}
     \label{fig:max-clusterSize}
 \end{figure}
 
-データサイズを変化させた結果を図\ref{fig:sum-dataSize}と図\ref{fig:max-dataSize}に示す。グリッドを用いた手法が最速となった。3手法とも線形に処理時間が増えていることがわかる。
+データサイズを変化させた結果を図\ref{fig:sum-dataSize}と図\ref{fig:max-dataSize}に示す。グリッドを用いた手法が最速となった。3手法ともデータサイズが増えるとに処理時間が増えているが、グリッドの増加は緩やかで合った。これは探索をクエリの近くから行なっているため、データサイズ の影響を受けにくいからと考えられる。
 
 \begin{figure}[H]
 	\centering
-    \fbox{\includegraphics[width=7cm]{images/experiment/variance/sum-dataSize.png}}
+    \fbox{\includegraphics[width=7cm]{images/experiment/SUM-DataSize.png}}
     \caption{$f=sum$, UN, $\alpha$ = 0.5 , $\beta$ = 0.5 ,k = 50, $\mid$Q$\mid$ = 5, n = $128^2$}
     \label{fig:sum-dataSize}
 \end{figure}
 
 \begin{figure}[H]
 	\centering
-    \fbox{\includegraphics[width=7cm]{images/experiment/variance/max-dataSize.png}}
+    \fbox{\includegraphics[width=7cm]{images/experiment/MAX-DataSize.png}}
     \caption{$f=max$, UN, $\alpha$ = 0.5 , $\beta$ = 0.5 ,k = 50, $\mid$Q$\mid$ = 5, n = $128^2$}
     \label{fig:max-dataSize}
 \end{figure}
