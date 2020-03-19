@@ -8,6 +8,7 @@
 \usepackage{float}
 \usepackage{algorithm}
 \usepackage[noend]{algorithmic}
+\usepackage{amsthm}
 
 
 % 印刷位置調整 %
@@ -21,6 +22,12 @@
 \def\BibTeX{{\rmfamily B\kern-.05em{\scshape i\kern-.025em b}\kern-.08em
  T\kern-.1667em\lower.7ex\hbox{E}\kern-.125em X}}
 \fboxsep=0pt
+\theoremstyle{definition}
+\newtheorem{theorem}{定理}
+\newtheorem*{theorem*}{定理}
+\newtheorem{definition}[theorem]{定義}
+\newtheorem*{definition*}{定義}
+\newtheorem{Proof}{証明}
 
 \papernumber{DEIM2020 H8-4}
 
@@ -156,47 +163,55 @@ V_P = \frac{1}{|P|} \sum_{i=1}^{n} \{dist(p_i, O_P)\}^2
 \Delta(C,Q) = \alpha \cdot f(O_C, Q) + \beta \cdot V_C\ \
 \end{equation}
 
-式(\ref{equ:f-delta})を用いて平滑パラメータ$\alpha, \beta$の値を変えることによってユーザーの好みを反映できる。例えば$\alpha>\beta$の場合はクラスタの位置が近い方が好ましいことを表し、$\alpha<\beta$の場合はクラスタの密度が高い方が好ましいことを表し、$\alpha=\beta$の場合はクラスタの位置と密度が同程度重要であることを表す。図\ref{fig:ex-delta}には3つのクラスタ$R_1$、$R_2$、$R_3$がある。この例では$R_2$がクラスタの密度が一番大きく、クエリに近いので解となる。$R_1$と$R_3$を比較すると密度は$R_3$の方が高いが、クエリとの距離は$R_1$の方が小さい値になっている。このような場合にクラスタを単純比較できないため、評価関数を用いて比較を行う。
+式(\ref{equ:f-delta})を用いて平滑パラメータ$\alpha, \beta$の値を変えることによってユーザーの好みを反映できる。例えば$\alpha>\beta$の場合はクラスタの位置が近い方が好ましいことを表し、$\alpha<\beta$の場合はクラスタの密度が高い方が好ましいことを表し、$\alpha=\beta$の場合はクラスタの位置と密度が同程度重要であることを表す。図\ref{fig:ex-delta}には3つのクラスタ$C_1$、$C_2$、$C_3$がある。この例では$C_2$がクラスタの密度が一番大きく、クエリに近いので解となる。$C_1$と$C_3$を比較すると密度は$C_3$の方が高いが、クエリとの距離は$C_1$の方が小さい値になっている。このような場合にクラスタを単純比較できないため、評価関数を用いて比較を行う。
 
 \begin{figure}[H]
 	\centering
-    \includegraphics[width=8cm]{images/ex-delta.pdf}
+    \includegraphics[width=8cm]{images/example-delta.png}
     \caption{クラスタの距離と密集度の関係}
     \label{fig:ex-delta}
 \end{figure}
 
 \subsection{フィルタリング}
 全てのデータ点$p$に対してクラスタを作成し、$\Delta(.)$の値を計算することはとても非効率である。これを省略するために、計算を行う前にフィルタリングを行う。
-評価式の両辺を$\alpha+\beta$で割ると次の式となる。
+評価式(\ref{equ:f-delta})の両辺を$\alpha+\beta$で割ると次の式となる。
 \begin{equation}
 \label{equ:filter-1}
 \frac{\Delta(C,Q)}{\alpha+\beta} = \frac{\alpha}{\alpha+\beta} \cdot f(O_C, Q) + \frac{\beta}{\alpha+\beta} \cdot V_C\ \
 \end{equation}
 
-$\alpha < \beta$の時、
-$$\frac{\alpha}{\alpha+\beta}  < 0.5, \frac{\beta}{\alpha+\beta} > 0.5$$
-である。
+$\frac{1}{\alpha+\beta}$はデータセットに関係なく一定であるので、 $\frac{\Delta(C,Q)}{\alpha+\beta}$を考えることは$\Delta(C,Q)$を考えることと同じであると言える。以降、$\frac{\Delta(C,Q)}{\alpha+\beta}$は$\Delta'(C,Q)$と表す。
 
-$\alpha + \beta < 1$の時、式(\ref{equ:f-delta})を変形し、以下の式を導出できる。
+$\alpha < \beta$の時、$\alpha$と$\beta$は以下の式を満たす。
 \begin{equation}
-\label{equ:filter1}
-\frac{\alpha + \beta}{\alpha}\cdot \Delta(C,Q) < f(O_C, Q) + V_C\ \  (\alpha < \beta)
+\label{equ:filter-alpha-beta}
+\frac{\beta}{\alpha} > 1
 \end{equation}
 
-現時点で最善の解$C_1$、$C_1$に属さない点$p$、$p$と他の任意の点を持つクラスタ$C_2$を考えると、
+式(\ref{equ:filter-alpha-beta})より式(\ref{equ:filter-1})は以下の通りに変形することができる。
+
+$$\Delta'(C,Q) = \frac{\alpha}{\alpha+\beta} \cdot f(O_C, Q) + \frac{\beta}{\alpha+\beta} \cdot V_C$$
+
+$$\frac{\alpha+\beta}{\alpha} \cdot \Delta'(C,Q) = f(O_C, Q) + \frac{\beta}{\alpha} \cdot V_C$$
+
 \begin{equation}
-\label{equ:filter2}
-f(p,Q) \leq f(O_{C_2},Q)+V_{C_2} < \frac{\alpha + \beta}{\alpha}\cdot \Delta(C_2,Q)
+\label{equ:filter-2}
+\frac{\alpha+\beta}{\alpha} \cdot \Delta'(C,Q) > f(O_C, Q) + V_C
 \end{equation}
 
-$\frac{\alpha + \beta}{\alpha} \cdot \Delta(C_1,Q) < f(p,Q)$が成り立つとき、式(\ref{equ:filter2})より$\Delta(C_1,Q) < \Delta(C_2,Q)$が成り立つ。
+式(\ref{equ:filter-2})より以下の定理が導出できる。
 
-これより、$\alpha < \beta$のとき、クエリ群$Q$とその時点での最善解であるクラスタ$C$を考えたときに、ある点$p$の$f(p,Q)$が$\frac{\alpha + \beta}{\alpha} \cdot \Delta(C,Q)$を超えた時に、点$p$は最善解には含まれないといえる。
-これを一般化すると以下の条件を満たす時に点$p$はフィルタリングされる。
-\begin{equation}
-\label{equ:filter-final}
-f(p,Q) > \frac{\alpha + \beta}{min(\alpha, \beta)} \cdot  \Delta(C,Q)
-\end{equation}
+\begin{theorem}
+クエリ$Q$と最善のクラスタ$C$があった時、クラスタとの集約距離が閾値$\frac{\alpha + \beta}{min(\alpha, \beta)} \cdot \Delta(C,Q)$よりも離れている時、その点は最善のクラスタにはなり得ない。
+\end{theorem}
+
+\begin{Proof}
+クエリ$Q$、現時点での最善のスコアを持つクラスタ$C_1$、$C_1$に属さない点$p$があり、$\alpha < \beta$であるとする。式(\ref{equ:filter-2})により、$p$と他の点で任意のクラスタ$C_2$を作成すると、以下の式が成り立つ。
+$$f(p,Q) \leq f(O_{C_2}, Q) + V_{C_2} < \frac{\alpha+\beta}{\alpha} \cdot \Delta(C_2,Q) $$
+したがって、$p$が現在の最善のクラスタ$C_1$によって作成された閾値$\frac{\alpha + \beta}{\alpha} \cdot \Delta(C_1,Q)$よりも遠くにある場合、$\Delta(C_1, Q) < \Delta(C_2, Q)$と推測できる。したがって、$p$を含むクラスタは$C_1$と比較して良いスコアを持たない。
+\qed
+\end{Proof}
+
 
 \subsection{ポイントベースの手法}
 以上の式を用いてクラスタを探索する手法を示す。まずはシンプルに探索するポイントペースの手法である。これは各データセットの点に対して$k-1$点の最近傍点を探し出し、クラスタを計算する。このクラスタの評価関数の値がその段階での最善解よりも良ければ解として更新する。クラスタを作成する前に式(\ref{equ:filter-final})を用いてフィルタリングを行う。ポイントベースの手法の擬似アルゴリズムをAlgorithm\ref{alg:point}に示す。
@@ -327,23 +342,6 @@ R-treeのを用いた手法の欠点は、走査が行われる際に毎回ル�
 クエリはデータセットからランダムに選択した。出力結果となるクエリサイズ$k$のデフォルト値は50、平滑パラメータ$\alpha, \beta$は共に0.5、グリットを用いる手法で分割するグリット数は$128^2$である。全ての実験結果は10回の試行の平均を用いている。
 
 \subsection{実験結果}
-% 平滑パラメータ$\alpha$を変化させた結果を図\ref{fig:sum-alpha}と図\ref{fig:max-alpha}に示す。集約距離をどちらに設定してもグリッドを用いた手法が他の2手法に比べて高速であることがいえる。これはグリッドを用いた手法ではクエリの近くから探索するので、フィルタリングに用いる閾値が早期に適切に設定され、フィルタリング量が大きかったためである。
-
-% 2つの集約距離に一貫して、$\alpha$が0.5を超えると処理時間がスパークする傾向にあった。これは評価式において、前半の項の大きさが後半の項と比較して大きく、閾値が$\beta$に比べて$\alpha$に依存している傾向にあるからだと考えられる。
-
-% \begin{figure}[H]
-% 	\centering
-%      \fbox{\includegraphics[width=7cm]{images/experiment/variance/sum-alpha-beta.png}}
-%     \caption{$f=sum$, NE, $\mid$P$\mid$ = 123,593, $\beta$ = 0.5, k = 50, $\mid$Q$\mid$ = 5, n = $128^2$}
-%     \label{fig:sum-alpha}
-% \end{figure}
-
-% \begin{figure}[H]
-% 	\centering
-%     \fbox{\includegraphics[width=7cm]{images/experiment/variance/max-alpha-beta.png}}
-%     \caption{$f=max$, NE, $\mid$P$\mid$ = 123,593, $\beta$ = 0.5,  k = 50, $\mid$Q$\mid$ = 5, n = $128^2$}
-%     \label{fig:max-alpha}
-% \end{figure}
 
 クエリサイズを変化させた結果を図\ref{fig:sum-querySize}と図\ref{fig:max-querySize}に示す。集約距離をどちらに設定してもグリッドを用いた手法が他の2手法に比べて高速であることがいえる。これはグリッドを用いた手法ではクエリの近くから探索するので、フィルタリングに用いる閾値が早期に適切に設定され、フィルタリング量が大きかったためである。集約距離合計のグリッドを用いた手法ではクエリサイズが大きくなるほど速くなる結果となった。集約距離を最大に設定すると、ポイントベースとR-treeを用いた手法では集約距離合計の場合よりも速い結果となった。これはフィルタリングに用いる閾値と比較する値が、集約距離合計の際にはクエリからの距離の平均であるのに対して、集約距離合計の際にはクエリからの距離からの最大値であるので、フィルタリング量が大きかったと考えられる。
 
